@@ -73,7 +73,7 @@ fun ChatsScreen(
     Scaffold(
         modifier = Modifier,
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = "VKMessenger") })
+            CenterAlignedTopAppBar(title = { Text(text = "NeVk") })
         },
         bottomBar = { VKMBottomAppBar({}, {}, {}) },
         snackbarHost = {
