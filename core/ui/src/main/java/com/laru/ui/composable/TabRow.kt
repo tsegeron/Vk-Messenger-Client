@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -17,10 +18,13 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabPosition
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -28,6 +32,8 @@ import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.laru.ui.model.Paddings
+import com.laru.ui.model.Sizes
+import kotlinx.coroutines.launch
 
 enum class TabItem {
     All, Personal, Channels, Bots,
@@ -41,10 +47,15 @@ enum class TabItem {
 @Composable
 fun VKMTabRow(
     tabItems: List<TabItem>,
-//    pagerState: PagerState,
+    pagerState: PagerState,
     modifier: Modifier = Modifier
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val animationScope = rememberCoroutineScope()
+
+    LaunchedEffect(pagerState.currentPage) {
+        selectedTabIndex = pagerState.currentPage
+    }
 
     ScrollableTabRow(
         selectedTabIndex = selectedTabIndex,
@@ -66,9 +77,14 @@ fun VKMTabRow(
     ) {
         tabItems.forEachIndexed { index, item ->
             Tab(
-                modifier = Modifier.fillMaxWidth().height(40.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(Sizes.tab),
                 selected = index == selectedTabIndex,
-                onClick = { selectedTabIndex = index },
+                onClick = {
+                    selectedTabIndex = index
+                    animationScope.launch { pagerState.animateScrollToPage(index) }
+                },
                 text = { Text(text = item.name) },
                 selectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 unselectedContentColor = MaterialTheme.colorScheme.secondaryContainer
