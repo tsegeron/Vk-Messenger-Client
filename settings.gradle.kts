@@ -20,6 +20,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "VK Messenger"
+include(":app")
 include(":feature")
 include(":core")
 include(":core:ui")
@@ -30,7 +31,5 @@ include(":core:common")
 include(":core:data")
 include(":feature:chat")
 include(":feature:settings")
-include(":vkm")
-include(":vkm:auth")
-include(":vkm:app")
 include(":feature:chats")
+include(":feature:auth")

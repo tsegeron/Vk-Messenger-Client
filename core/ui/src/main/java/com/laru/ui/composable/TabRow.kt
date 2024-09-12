@@ -24,7 +24,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -79,7 +78,7 @@ fun VKMTabRow(
             Tab(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(Sizes.tab),
+                    .height(Sizes.tabHeight),
                 selected = index == selectedTabIndex,
                 onClick = {
                     selectedTabIndex = index

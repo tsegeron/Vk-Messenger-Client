@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
@@ -39,6 +41,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -46,12 +49,14 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.laru.app.ui.theme.VKMessengerTheme
@@ -72,7 +77,7 @@ fun BasicInputTextField(
     isError: Boolean = false,
     focused: MutableState<Boolean> = remember { mutableStateOf(false) },
     leadingIcon: @Composable (() -> Unit)? = null,
-    placeholder: @Composable (() -> Unit)? = null,
+    placeholderText: String? = null,
     trailingIcon: @Composable (() -> Unit)? = defaultTrailingIcon(
         value.text, onCancel, enabled, isError, focused.value
     ),
@@ -85,73 +90,99 @@ fun BasicInputTextField(
     textStyle: TextStyle = LocalTextStyle.current,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = MaterialTheme.shapes.large,
-    colors: TextFieldColors = TextFieldDefaults.colors( // TODO: provide other default colors
-        focusedIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-        errorIndicatorColor = Color.Transparent,
-        disabledIndicatorColor = Color.Transparent,
-    ),
+    colors: TextFieldColors = TextFieldDefaults.basicInputTextFieldColors(),
 ) {
     val focusRequester = remember { FocusRequester() }
 
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier
-            .height(Sizes.textField)
-            .focusRequester(focusRequester)
-            .onFocusChanged { focused.value = it.isFocused },
-        singleLine = true,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        textStyle = textStyle,
-        interactionSource = interactionSource,
-        decorationBox = { innerTextField ->
-            val pickedColors = colorPicker(enabled, isError, focused.value, colors)
+    CompositionLocalProvider(LocalTextSelectionColors provides colors.textSelectionColors) {
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = modifier
+                .height(Sizes.textFieldHeight)
+                .focusRequester(focusRequester)
+                .onFocusChanged { focused.value = it.isFocused },
+            singleLine = true,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            textStyle = textStyle,
+            interactionSource = interactionSource,
+            decorationBox = decorationBox(
+                pickedColors = colorPicker(enabled, isError, focused.value, colors),
+                placeholderText = placeholderText,
+                textStyle = textStyle,
+                shape = shape,
+                focused = focused.value,
+                isValueEmpty = value.text.isEmpty(),
+                leadingIcon = leadingIcon,
+                trailingIcon = trailingIcon
+            )
+        )
+    }
+}
 
-            Box(Modifier.fillMaxSize().background(pickedColors.containerColor, shape))
+private fun decorationBox(
+    pickedColors: ColorPicker,
+    placeholderText: String?,
+    textStyle: TextStyle,
+    shape: Shape,
+    focused: Boolean,
+    isValueEmpty: Boolean,
+    leadingIcon: @Composable (() -> Unit)?,
+    trailingIcon: @Composable (() -> Unit)?
+): @Composable (innerTextField: @Composable () -> Unit) -> Unit = { innerTextField ->
+    var measuredTextWidth by remember { mutableStateOf(0.dp) }
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
 
-            BoxWithConstraints(contentAlignment = Alignment.CenterStart) {
-                // maxWidth –> maxWidth of BasicTextField
-                // 84.dp –> leadingIcon + padding + Text("Search")
-                // (maxWidth - 84.dp)/2  -> middle of the container
-                // for now I don't know how to find ideal center of the container based on
-                // [BasicTextField, leadingIcon, padding, text] widths without using
-                // `Modifier.onSizeChanged` or bunch of `BoxWithConstraints`
-                val startPadding by animateDpAsState(
-                    targetValue = if (focused.value) {
-                        PaddingValues(Paddings.small).calculateStartPadding(LayoutDirection.Ltr)
-                    } else (maxWidth - 84.dp)/2,
-                    label = "StartPaddingDpAnimation"
-                )
+    placeholderText?.let { // TODO: LaunchedEffect
+//        LaunchedEffect(placeholderText) {
+            val textLayoutResult = textMeasurer.measure(placeholderText, style = textStyle, maxLines = 1)
+            measuredTextWidth = with(density) { textLayoutResult.size.width.toDp() }
+//        }
+    }
 
-                Row(
-                    modifier = Modifier
-                        .padding(start = startPadding, end = Paddings.small)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CompositionLocalProvider(LocalContentColor provides pickedColors.leadingIconColor) {
-                        leadingIcon?.invoke()
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(pickedColors.containerColor, shape)
+    )
+
+    BoxWithConstraints(contentAlignment = Alignment.CenterStart) {
+        val startPadding by animateDpAsState(
+            targetValue = if (focused || !isValueEmpty) {
+                PaddingValues(Paddings.small).calculateStartPadding(LayoutDirection.Ltr)
+            } else (maxWidth - (Sizes.icon + Paddings.small + measuredTextWidth)) / 2,
+            label = "StartPaddingDpAnimation"
+        )
+
+        Row(
+            modifier = Modifier
+                .padding(start = startPadding, end = Paddings.small)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CompositionLocalProvider(LocalContentColor provides pickedColors.leadingIconColor) {
+                leadingIcon?.invoke()
+            }
+            Spacer(Modifier.width(Spacers.small))
+            if (isValueEmpty && placeholderText != null) {
+                CompositionLocalProvider(LocalContentColor provides pickedColors.placeholderColor) {
+                    Text(text = placeholderText)
+                }
+            } else {
+                CompositionLocalProvider(LocalContentColor provides pickedColors.innerTextFieldColor) {
+                    Box(Modifier.weight(1f)) {
+                        innerTextField()
                     }
-                    Spacer(Modifier.width(Spacers.small))
-                    if (value.text.isEmpty()) {
-                        CompositionLocalProvider(LocalContentColor provides pickedColors.placeholderColor) {
-                            placeholder?.invoke()
-                        }
-                    } else {
-                        CompositionLocalProvider(LocalContentColor provides pickedColors.innerTextFieldColor) {
-                            Box(Modifier.weight(1f)) { innerTextField() }
-                        }
-                        CompositionLocalProvider(LocalContentColor provides pickedColors.trailingIconColor) {
-                            // TODO: box trailingIcon into 20.dp size (set maxSize = 20.dp)
-                            trailingIcon?.invoke()
-                        }
-                    }
+                }
+                CompositionLocalProvider(LocalContentColor provides pickedColors.trailingIconColor) {
+                    // TODO: box trailingIcon into 20.dp size (set maxSize = 20.dp)
+                    trailingIcon?.invoke()
                 }
             }
         }
-    )
+    }
 }
 
 private fun defaultTrailingIcon(
@@ -183,6 +214,58 @@ private fun defaultTrailingIcon(
     }
     else -> null
 }
+
+// Change default colors
+@Composable
+fun TextFieldDefaults.basicInputTextFieldColors(
+    focusedTextColor: Color = Color.Unspecified,
+    unfocusedTextColor: Color = Color.Unspecified,
+    disabledTextColor: Color = Color.Unspecified,
+    errorTextColor: Color = Color.Unspecified,
+    focusedContainerColor: Color = Color.Unspecified,
+    unfocusedContainerColor: Color = Color.Unspecified,
+    disabledContainerColor: Color = Color.Unspecified,
+    errorContainerColor: Color = Color.Unspecified,
+    focusedLeadingIconColor: Color = Color.Unspecified,
+    unfocusedLeadingIconColor: Color = Color.Unspecified,
+    disabledLeadingIconColor: Color = Color.Unspecified,
+    errorLeadingIconColor: Color = Color.Unspecified,
+    focusedPlaceholderColor: Color = Color.Unspecified,
+    unfocusedPlaceholderColor: Color = Color.Unspecified,
+    disabledPlaceholderColor: Color = Color.Unspecified,
+    errorPlaceholderColor: Color = Color.Unspecified,
+    focusedTrailingIconColor: Color = Color.Unspecified,
+    unfocusedTrailingIconColor: Color = Color.Unspecified,
+    disabledTrailingIconColor: Color = Color.Unspecified,
+    errorTrailingIconColor: Color = Color.Unspecified,
+    textSelectionColors: TextSelectionColors? = null
+//        TextSelectionColors(
+//        handleColor = Color.Magenta,
+//        backgroundColor = Color.Yellow
+//    ),
+): TextFieldColors = colors(
+    focusedTextColor = focusedTextColor,
+    unfocusedTextColor = unfocusedTextColor,
+    disabledTextColor = disabledTextColor,
+    errorTextColor = errorTextColor,
+    focusedContainerColor = focusedContainerColor,
+    unfocusedContainerColor = unfocusedContainerColor,
+    disabledContainerColor = disabledContainerColor,
+    errorContainerColor = errorContainerColor,
+    focusedLeadingIconColor = focusedLeadingIconColor,
+    unfocusedLeadingIconColor = unfocusedLeadingIconColor,
+    disabledLeadingIconColor = disabledLeadingIconColor,
+    errorLeadingIconColor = errorLeadingIconColor,
+    focusedPlaceholderColor = focusedPlaceholderColor,
+    unfocusedPlaceholderColor = unfocusedPlaceholderColor,
+    disabledPlaceholderColor = disabledPlaceholderColor,
+    errorPlaceholderColor = errorPlaceholderColor,
+    focusedTrailingIconColor = focusedTrailingIconColor,
+    unfocusedTrailingIconColor = unfocusedTrailingIconColor,
+    disabledTrailingIconColor = disabledTrailingIconColor,
+    errorTrailingIconColor = errorTrailingIconColor,
+    selectionColors = textSelectionColors,
+)
 
 @Stable
 private fun colorPicker(
@@ -245,12 +328,10 @@ private data class ColorPicker(
     val trailingIconColor: Color,
 )
 
-
 @ThemePreviews
 @Composable
 private fun BasicInputTextFieldPreview() {
     VKMessengerTheme {
-        // Since there is an animation the composable stays in its initial state
         Surface {
             val isFocused = remember {
                 mutableStateOf(true)
@@ -273,7 +354,7 @@ private fun BasicInputTextFieldPreview() {
                     value = TextFieldValue(),
                     onValueChange = {},
                     leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
-                    placeholder = { Text(text = "Search") }
+                    placeholderText = "Search"
                 )
 
                 BasicInputTextField(
@@ -287,7 +368,7 @@ private fun BasicInputTextFieldPreview() {
                     modifier = Modifier.fillMaxWidth(),
                     value = TextFieldValue(),
                     onValueChange = {},
-                    placeholder = { Text(text = "Search") },
+                    placeholderText = "Phone or Email",
                     leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
                     enabled = false
                 )
