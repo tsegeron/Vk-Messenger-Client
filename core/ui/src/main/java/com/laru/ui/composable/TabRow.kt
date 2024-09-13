@@ -78,7 +78,7 @@ fun VKMTabRow(
             Tab(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(Sizes.tabHeight),
+                    .height(Sizes.tabHeightDefault),
                 selected = index == selectedTabIndex,
                 onClick = {
                     selectedTabIndex = index

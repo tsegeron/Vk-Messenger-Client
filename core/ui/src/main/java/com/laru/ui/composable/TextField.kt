@@ -2,6 +2,7 @@ package com.laru.ui.composable
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -89,7 +91,7 @@ fun BasicInputTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     textStyle: TextStyle = LocalTextStyle.current,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = MaterialTheme.shapes.large,
+    shape: Shape = MaterialTheme.shapes.large, // medium
     colors: TextFieldColors = TextFieldDefaults.basicInputTextFieldColors(),
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -99,7 +101,7 @@ fun BasicInputTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = modifier
-                .height(Sizes.textFieldHeight)
+                .height(Sizes.textFieldHeightDefault)
                 .focusRequester(focusRequester)
                 .onFocusChanged { focused.value = it.isFocused },
             singleLine = true,
@@ -136,16 +138,21 @@ private fun decorationBox(
     val density = LocalDensity.current
 
     placeholderText?.let { // TODO: LaunchedEffect
-//        LaunchedEffect(placeholderText) {
+        LaunchedEffect(placeholderText) {
             val textLayoutResult = textMeasurer.measure(placeholderText, style = textStyle, maxLines = 1)
             measuredTextWidth = with(density) { textLayoutResult.size.width.toDp() }
-//        }
+        }
     }
 
     Box(
         Modifier
             .fillMaxSize()
             .background(pickedColors.containerColor, shape)
+            .then(
+                if (focused) { // TODO: provide proper color
+                    Modifier.border(1.dp, shape = shape, color = pickedColors.trailingIconColor)
+                } else Modifier
+            )
     )
 
     BoxWithConstraints(contentAlignment = Alignment.CenterStart) {

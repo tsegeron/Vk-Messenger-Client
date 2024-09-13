@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.laru.app.ui.theme.VKMessengerTheme
+import com.laru.auth.ui.AuthScreen
 import com.laru.chats.ui.ChatsScreen
 import com.laru.chats.ui.model.ChatsListItem
 
@@ -20,7 +21,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             VKMessengerTheme {
-                ChatsScreen(mockData)
+//                ChatsScreen(mockData)
+                AuthScreen()
             }
         }
     }
