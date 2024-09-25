@@ -74,12 +74,14 @@ fun BasicInputTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
+    contentModifier: Modifier = Modifier, // for the row with leading/trailing icon, placeholder, value
     onCancel: () -> Unit = { onValueChange(TextFieldValue()) },
     enabled: Boolean = true,
     isError: Boolean = false,
     focused: MutableState<Boolean> = remember { mutableStateOf(false) },
     leadingIcon: @Composable (() -> Unit)? = null,
-    placeholderText: String? = null,
+    placeholderText: String? = null, // so its width could be measured
+//    placeholderText: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = defaultTrailingIcon(
         value.text, onCancel, enabled, isError, focused.value
     ),
@@ -101,7 +103,6 @@ fun BasicInputTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = modifier
-                .height(Sizes.textFieldHeightDefault)
                 .focusRequester(focusRequester)
                 .onFocusChanged { focused.value = it.isFocused },
             singleLine = true,
@@ -117,7 +118,8 @@ fun BasicInputTextField(
                 focused = focused.value,
                 isValueEmpty = value.text.isEmpty(),
                 leadingIcon = leadingIcon,
-                trailingIcon = trailingIcon
+                trailingIcon = trailingIcon,
+                rowModifier = contentModifier
             )
         )
     }
@@ -131,13 +133,14 @@ private fun decorationBox(
     focused: Boolean,
     isValueEmpty: Boolean,
     leadingIcon: @Composable (() -> Unit)?,
-    trailingIcon: @Composable (() -> Unit)?
+    trailingIcon: @Composable (() -> Unit)?,
+    rowModifier: Modifier = Modifier
 ): @Composable (innerTextField: @Composable () -> Unit) -> Unit = { innerTextField ->
     var measuredTextWidth by remember { mutableStateOf(0.dp) }
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
 
-    placeholderText?.let { // TODO: LaunchedEffect
+    placeholderText?.let {
         LaunchedEffect(placeholderText) {
             val textLayoutResult = textMeasurer.measure(placeholderText, style = textStyle, maxLines = 1)
             measuredTextWidth = with(density) { textLayoutResult.size.width.toDp() }
@@ -166,7 +169,8 @@ private fun decorationBox(
         Row(
             modifier = Modifier
                 .padding(start = startPadding, end = Paddings.small)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .then(rowModifier),
             verticalAlignment = Alignment.CenterVertically
         ) {
             CompositionLocalProvider(LocalContentColor provides pickedColors.leadingIconColor) {
@@ -184,7 +188,6 @@ private fun decorationBox(
                     }
                 }
                 CompositionLocalProvider(LocalContentColor provides pickedColors.trailingIconColor) {
-                    // TODO: box trailingIcon into 20.dp size (set maxSize = 20.dp)
                     trailingIcon?.invoke()
                 }
             }
