@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.laru.settings"
+    namespace = "com.laru.friends"
     compileSdk = 34
 
     defaultConfig {

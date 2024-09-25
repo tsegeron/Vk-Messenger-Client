@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.laru.settings"
+    namespace = "com.laru.chatinfo"
     compileSdk = 34
 
     defaultConfig {

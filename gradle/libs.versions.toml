@@ -2,15 +2,17 @@
 activity = "1.9.2"
 appcompat = "1.7.0"
 agp = "8.5.2"
+coil = "2.7.0"
 coreKtx = "1.13.1"
-composeBom = "2024.09.00"
+composeBom = "2024.09.01"
 dagger = "2.52"
 espressoCore = "3.6.1"
 androidxHilt = "1.2.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 kotlin = "2.0.20"
-kotlinCoroutines = "1.8.1"
+kotlinCoroutines = "1.9.0"
+kotlinSerialization = "1.7.1"
 ksp = "2.0.20-1.0.24"
 lifecycleRuntimeKtx = "2.8.5"
 lifecycleViewmodelCompose = "2.8.5"
@@ -19,10 +21,19 @@ material = "1.12.0"
 navigation = "2.8.0"
 paging = "3.3.2"
 splashScreen = "1.0.1"
+vkSdk = "4.1.0"
 uiToolingPreviewAndroid = "1.7.0"
 
 
 [libraries]
+# Activity
+activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity" }
+activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+
+# Coil
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+
 # Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 splashScreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
@@ -31,12 +42,7 @@ splashScreen = { group = "androidx.core", name = "core-splashscreen", version.re
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 
-# Activity
-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity" }
-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-
-#Coroutines
+# Coroutines
 kotlinxCoroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
 testCoroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinCoroutines" }
 
@@ -48,7 +54,7 @@ androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 
-#Dagger
+# Dagger
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "dagger" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "dagger" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHilt" }
@@ -56,17 +62,20 @@ hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-com
 # Google
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
-#Lottie
-lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
+# Lottie
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version = "6.5.2" }
 
-#Navigation
+# Navigation
 navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
 navigation-ui = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
 compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 
-#Paging
+# Paging
 paging-runtime-ktx = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+
+# Serialization
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -75,10 +84,15 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 
+# VK
+vk-sdk-core = { group = "com.vk", name = "android-sdk-core", version.ref = "vkSdk" }
+vk-sdk-api = { group = "com.vk", name = "android-sdk-api", version.ref = "vkSdk" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
@@ -91,5 +105,7 @@ compose = ["androidx-ui", "androidx-ui-graphics",
 core = ["androidx-core-ktx", "splashScreen"]
 lifecycle = ["lifecycle-runtime-ktx", "lifecycle-viewmodel-compose"]
 navigation = ["navigation-fragment", "navigation-ui", "compose-navigation", ]
+vk-sdk = ["vk-sdk-core", "vk-sdk-api"]
+
 test = ["junit", "androidx-junit", "androidx-espresso-core", "androidx-ui-test-manifest",
     "androidx-ui-test-junit4", ]
