@@ -56,13 +56,14 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:data"))
     implementation(project(":core:datastore"))
-    implementation(project(":core:network"))
     implementation(project(":core:notifications"))
     implementation(project(":core:ui"))
     implementation(project(":feature:auth"))
-    implementation(project(":feature:chat"))
-    implementation(project(":feature:chats"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:friends"))
+    implementation(project(":feature:chats"))
+    implementation(project(":feature:chat"))
+    implementation(project(":feature:chatinfo"))
 
 
     implementation(libs.bundles.activity)
