@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
@@ -49,6 +50,9 @@ dependencies {
     implementation(libs.bundles.compose)
 
     implementation(libs.lottie.compose)
+
+    implementation(libs.bundles.navigation)
+    implementation(libs.kotlinx.serialization)
 
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.android)

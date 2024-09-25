@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.StateFlow
 interface AuthRepository {
     val authState: StateFlow<AuthState>
 
-    // funs
+     suspend fun proceedAuthorization()
 }
