@@ -1,4 +1,4 @@
-package com.laru.chats.ui.composable
+package com.laru.chats.composable
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -28,7 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.laru.app.ui.theme.VKMessengerTheme
 import com.laru.chats.R
-import com.laru.chats.ui.model.ChatsListItem
+import com.laru.chats.model.ChatsListItem
 import com.laru.common.extensions.toDatetime
 import com.laru.common.preview.ThemePreviews
 import com.laru.ui.model.Paddings

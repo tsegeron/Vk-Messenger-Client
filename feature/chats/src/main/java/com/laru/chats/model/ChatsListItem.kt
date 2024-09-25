@@ -1,4 +1,4 @@
-package com.laru.chats.ui.model
+package com.laru.chats.model
 
 data class ChatsListItem(
     val id: Long,
