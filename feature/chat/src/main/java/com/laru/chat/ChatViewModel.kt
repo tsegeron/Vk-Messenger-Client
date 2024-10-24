@@ -14,13 +14,13 @@ import javax.inject.Inject
 
 @HiltViewModel(assistedFactory = ChatViewModel.Factory::class)
 class ChatViewModel @AssistedInject constructor(
-    @Assisted val chatId: Int, // Long??
+    @Assisted val chatId: Long,
     private val chatRepository: ChatRepository
 ): ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(chatId: Int): ChatViewModel
+        fun create(chatId: Long): ChatViewModel
     }
 
     init {
@@ -29,13 +29,4 @@ class ChatViewModel @AssistedInject constructor(
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    companion object {
-        fun provideFactory(factory: Factory, chatId: Int): ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return factory.create(chatId) as T
-                }
-            }
-    }
 }

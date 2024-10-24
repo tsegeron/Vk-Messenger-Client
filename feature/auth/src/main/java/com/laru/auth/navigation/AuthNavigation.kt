@@ -11,8 +11,8 @@ import kotlinx.serialization.Serializable
 
 fun NavController.navigateToAuth() = navigate(AuthRoute)
 
-fun NavGraphBuilder.authScreen() {
+fun NavGraphBuilder.authScreen(proceedAuthorization: () -> Unit) {
     composable<AuthRoute> {
-        AuthScreen()
+        AuthScreen(proceedAuthorization)
     }
 }

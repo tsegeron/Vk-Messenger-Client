@@ -1,5 +1,5 @@
 package com.laru.data.model
 
 enum class AuthState {
-    Waiting, SignedIn
+    Waiting, SignedIn, Failed, Cancelled
 }

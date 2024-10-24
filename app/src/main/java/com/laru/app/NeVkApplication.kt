@@ -5,4 +5,8 @@ import dagger.hilt.android.HiltAndroidApp
 
 
 @HiltAndroidApp
-class NeVkApplication: Application()
+class NeVkApplication: Application() {
+    override fun onCreate() {
+        super.onCreate()
+    }
+}

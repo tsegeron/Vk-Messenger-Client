@@ -1,3 +1,6 @@
+import com.android.ddmlib.Log
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -58,6 +61,7 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":core:notifications"))
     implementation(project(":core:ui"))
+    implementation(project(":core:settings"))
     implementation(project(":feature:auth"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:friends"))
@@ -79,6 +83,8 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
+
+    implementation(libs.bundles.vk.sdk)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

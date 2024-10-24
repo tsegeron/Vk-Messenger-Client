@@ -5,7 +5,7 @@ import javax.inject.Inject
 class ChatRepositoryImpl @Inject constructor(
 
 ): ChatRepository {
-    override suspend fun initializeMessages(chatId: Int) {
+    override suspend fun initializeMessages(chatId: Long) {
 
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,24 +31,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
+import com.laru.data.model.ChatCategory
 import com.laru.ui.model.Paddings
 import com.laru.ui.model.Sizes
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
-enum class TabItem {
-    All, Personal, Channels, Bots,
-//    Something
-}
-
-//data class TabItem(
-//    val title: String,
-//)
 
 // NOTE: check transition with more than 4 tabItems
 @Composable
 fun ScrollableTabRow(
-    tabItems: List<TabItem>,
+    tabItems: List<ChatCategory>,
     pagerState: PagerState,
     modifier: Modifier = Modifier,
 ) {
@@ -78,10 +72,12 @@ fun ScrollableTabRow(
                         .fillMaxWidth()
                         .height(Sizes.tabHeightDefault),
                     selected = index == pagerState.currentPage,
-                    onClick = { animationScope.launch { pagerState.animateScrollToPage(index) } },
+                    onClick = { animationScope.launch {
+                        pagerState.animateScrollToPage(page = index, animationSpec = tween())
+                    } },
                     text = { Text(text = item.name) },
-                    selectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 1 - pagerState.currentPageOffsetFraction.absoluteValue),
-                    unselectedContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                    selectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 1f - pagerState.currentPageOffsetFraction.absoluteValue),
+                    unselectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
             }
         }

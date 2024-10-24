@@ -8,13 +8,13 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun AuthNavHost(
-//    onAuthSuccess: () -> Unit,
+    proceedAuthorization: () -> Unit,
     navHostController: NavHostController = rememberNavController(),
 ) {
     NavHost(
         navController = navHostController,
         startDestination = AuthRoute
     ) {
-        authScreen()
+        authScreen(proceedAuthorization)
     }
 }

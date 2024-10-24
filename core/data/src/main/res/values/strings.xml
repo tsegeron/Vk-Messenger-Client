@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<!--    export to integers xml or as secret? -->
     <integer name="com_vk_sdk_AppId">52307306</integer>
+
+    <string name="last_seen_long_ago">last seen long ago</string>
+    <string name="last_seen_on_date">last seen %s</string>
+    <string name="last_seen_on_day">last seen on %s</string>
+    <string name="last_seen_at_time">last seen at %s</string>
+    <string name="last_seen_minutes_ago">last seen %s minutes ago</string>
+    <string name="last_seen_recently">last seen recently</string>
 
 </resources>

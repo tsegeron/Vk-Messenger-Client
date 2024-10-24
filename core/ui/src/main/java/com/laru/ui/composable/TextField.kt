@@ -162,7 +162,7 @@ private fun decorationBox(
         val startPadding by animateDpAsState(
             targetValue = if (focused || !isValueEmpty) {
                 PaddingValues(Paddings.small).calculateStartPadding(LayoutDirection.Ltr)
-            } else (maxWidth - (Sizes.icon + Paddings.small + measuredTextWidth)) / 2,
+            } else (maxWidth - (Sizes.iconDefault + Paddings.small + measuredTextWidth)) / 2,
             label = "StartPaddingDpAnimation"
         )
 
@@ -207,7 +207,7 @@ private fun defaultTrailingIcon(
             Icon(
                 painter = painterResource(R.drawable.ic_error_24),
                 contentDescription = stringResource(id = R.string.error),
-                modifier = Modifier.size(Sizes.icon)
+                modifier = Modifier.size(Sizes.iconDefault)
             )
         }
     }
@@ -217,7 +217,7 @@ private fun defaultTrailingIcon(
                 imageVector = Icons.Default.Clear,
                 contentDescription = stringResource(id = R.string.clear),
                 modifier = Modifier
-                    .size(Sizes.icon)
+                    .size(Sizes.iconDefault)
                     .clickable { onClick() }
             )
         }
@@ -352,15 +352,20 @@ private fun BasicInputTextFieldPreview() {
                     .padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
+                val modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .height(40.dp)
+
                 BasicInputTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = modifier,
                     value = TextFieldValue("Enabled"),
                     focused = isFocused,
                     onValueChange = {},
                     leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
                 )
                 BasicInputTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = modifier,
                     value = TextFieldValue(),
                     onValueChange = {},
                     leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
@@ -368,14 +373,14 @@ private fun BasicInputTextFieldPreview() {
                 )
 
                 BasicInputTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = modifier,
                     value = TextFieldValue("Error"),
                     onValueChange = {},
                     leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
                     isError = true
                 )
                 BasicInputTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = modifier,
                     value = TextFieldValue(),
                     onValueChange = {},
                     placeholderText = "Phone or Email",

@@ -1,5 +1,7 @@
 package com.laru.chats.model
 
+import com.laru.data.model.Chat
+
 data class ChatsListItem(
     val id: Long,
     val title: String,
@@ -48,3 +50,14 @@ data class ChatsListItem(
         )
     }
 }
+
+fun Chat.toChatsListItem() = ChatsListItem(
+    id = id,
+    title = title,
+    isMuted = isMuted,
+    lastMsg = lastMsg,
+    lastMsgTime = lastMsgTime,
+    unreadCount = unreadCount,
+    profileImage = profileImage,
+)
+

@@ -12,6 +12,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.laru.app.ui.theme.VKMessengerTheme
 import com.laru.auth.composable.OneTapButton
 import com.laru.common.preview.ThemePreviews
+import com.laru.data.model.AuthState
 import com.laru.ui.model.Paddings
 import com.laru.ui.model.Sizes
 import com.laru.ui.model.Spacers
@@ -41,11 +43,12 @@ import kotlinx.serialization.Serializable
 
 @Composable
 fun AuthScreen(
-//    onAuthSuccess: () -> Unit,
+    proceedAuthorization: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val authState by viewModel.authState.collectAsState()
 
     Scaffold(
 //        snackbarHost = {
@@ -80,14 +83,20 @@ fun AuthScreen(
             Spacer(modifier = Modifier.height(Spacers.extraLarge))
 
             OneTapButton(
-                onClick = viewModel::proceedAuthorization,
-//                {
-//                    scope.launch { snackbarHostState.showSnackbar(message = "Snackbar") }
-//                },
+                onClick = proceedAuthorization,
                 modifier = Modifier
                     .padding(horizontal = Paddings.large)
                     .fillMaxWidth()
                     .height(Sizes.buttonHeightMedium)
+            )
+
+
+            Spacer(modifier = Modifier.height(Spacers.small))
+            Text(
+                text = authState.name,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(horizontal = Paddings.large)
             )
         }
     }
@@ -111,57 +120,11 @@ private fun LottieAnimation(modifier: Modifier = Modifier) {
     )
 }
 
-//@Composable
-//private fun SignInForm(
-//    textFieldValue: TextFieldValue,
-//    onValueChange: (TextFieldValue) -> Unit,
-//    onClear: () -> Unit,
-//    modifier: Modifier = Modifier
-//) {
-//    OutlinedTextField(
-//        value = textFieldValue,
-//        onValueChange = onValueChange,
-//        shape = MaterialTheme.shapes.large,
-//        label = { Text(text = "Phone or Email") },  // uiState
-//        trailingIcon = textFieldValue.text.ifNotEmptyOrNull {
-//            Icon(
-//                imageVector = Icons.Default.Clear,
-//                contentDescription = stringResource(com.laru.ui.R.string.clear),
-//                modifier = Modifier
-//                    .size(Sizes.icon)
-//                    .clickable(onClick = onClear)
-//            )
-//        },
-//        singleLine = true,
-//        modifier = modifier
-//            .padding(horizontal = Paddings.large)
-//            .fillMaxWidth()
-//    )
-//    Spacer(modifier = Modifier.height(Spacers.large))
-//
-//    FilledTonalButton(
-//        onClick = { /*TODO*/ },
-//        modifier = Modifier
-//            .width(160.dp)
-//            .height(Sizes.buttonHeightMedium),
-//        colors = ButtonDefaults.filledTonalButtonColors(
-//            containerColor = MaterialTheme.colorScheme.primaryContainer,
-//            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-//        ),
-//        shape = MaterialTheme.shapes.extraLarge,
-//        content = { Text(text = "Sign in", style = MaterialTheme.typography.bodyLarge) }
-//    )
-//}
-
-
-fun String.ifNotEmptyOrNull(content: @Composable () -> Unit): @Composable (() -> Unit)? =
-    if (isEmpty()) null else content
-
 
 @ThemePreviews
 @Composable
 private fun AuthScreenPreview() {
     VKMessengerTheme {
-        AuthScreen()
+        AuthScreen({})
     }
 }

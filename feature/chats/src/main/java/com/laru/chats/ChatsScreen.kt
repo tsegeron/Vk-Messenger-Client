@@ -1,6 +1,7 @@
 package com.laru.chats
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -42,6 +43,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,51 +62,36 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.laru.app.ui.theme.VKMessengerTheme
 import com.laru.chats.composable.ChatsListItemRow
 import com.laru.chats.model.ChatsListItem
 import com.laru.common.preview.ThemePreviews
+import com.laru.data.model.ChatCategory
+import com.laru.ui.animation.AnchoredPagerNestedScrollConnection
+import com.laru.ui.animation.textFieldAnchoredDraggableState
 import com.laru.ui.composable.BasicInputTextField
 import com.laru.ui.composable.ScrollableTabRow
-import com.laru.ui.composable.TabItem
+import com.laru.ui.composable.ToTopAnimatedFloatingActionButton
+import com.laru.ui.extensions.isAtTop
+import com.laru.ui.model.AnchorState
 import com.laru.ui.model.Paddings
 import kotlinx.coroutines.launch
-
-
-internal enum class AnchorState { Start, End }
+import com.laru.ui.R as uiR
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ChatsScreen(
-//    chats: List<ChatsListItem> // maybe null/empty
-    onChatClick: (Int) -> Unit,
+    onChatClick: (Long) -> Unit,
+    chatsViewModel: ChatsViewModel = hiltViewModel()
 ) {
-    val mockData = listOf(
-        ChatsListItem.mockDataShort,
-        ChatsListItem.mockDataLong,
-        ChatsListItem.mockDataShortMuted,
-        ChatsListItem.mockDataLongMuted,
-        ChatsListItem.mockDataShort,
-        ChatsListItem.mockDataLong,
-        ChatsListItem.mockDataShortMuted,
-        ChatsListItem.mockDataLongMuted,
-        ChatsListItem.mockDataShort,
-        ChatsListItem.mockDataLong,
-        ChatsListItem.mockDataShortMuted,
-        ChatsListItem.mockDataLongMuted,
-        ChatsListItem.mockDataShort,
-        ChatsListItem.mockDataLong,
-        ChatsListItem.mockDataShortMuted,
-        ChatsListItem.mockDataLongMuted,
-        ChatsListItem.mockDataShort,
-        ChatsListItem.mockDataLong,
-        ChatsListItem.mockDataShortMuted,
-        ChatsListItem.mockDataLongMuted,
-    )
+    val chats by chatsViewModel.chats.collectAsState()
+    val categories = chatsViewModel.chatCategories
 
-    val pagerState = rememberPagerState { TabItem.entries.size }
-    val listsStates = List(4) { rememberLazyListState() }
+    val pagerState = rememberPagerState { categories.size }
+    val listsStates = List(categories.size) { rememberLazyListState() }
     val isToTopIconVisible = listsStates.map { listState -> remember {
         derivedStateOf { listState.firstVisibleItemIndex > 4 }
     } }
@@ -124,87 +111,24 @@ fun ChatsScreen(
             )
         },
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = isToTopIconVisible[pagerState.currentPage].value,
-                enter = fadeIn() + slideInHorizontally(initialOffsetX = { it / 2 }),
-                exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it / 2 })
-            ) {
-                IconButton(
-                    onClick = { coroutineScope.launch {
-                        listsStates[pagerState.currentPage].animateScrollToItem(0)
-                    } },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)
-                }
-            }
+            ToTopAnimatedFloatingActionButton(
+                isVisible = isToTopIconVisible[pagerState.currentPage].value,
+                onClick = { coroutineScope.launch {
+                    listsStates[pagerState.currentPage].animateScrollToItem(0)
+                } }
+            )
         }
     ) { innerPadding ->
         var textFieldValue: TextFieldValue by remember { mutableStateOf(TextFieldValue("")) }
 
         val density = LocalDensity.current
-        val anchoredDraggableState = remember {
-            AnchoredDraggableState(
-                initialValue = AnchorState.Start,
-                anchors = DraggableAnchors {
-                    AnchorState.Start at 0f
-                    AnchorState.End at with(density) { 56.dp.toPx() } // max textField height
-                },
-                positionalThreshold = { distance: Float -> distance * 0.4f },
-                velocityThreshold = { Int.MAX_VALUE.toFloat() },
-                snapAnimationSpec = tween(),
-                decayAnimationSpec = splineBasedDecay(density),
-            )
-        }
+        val anchoredDraggableState = remember { textFieldAnchoredDraggableState(density) }
         val isAtTop = listsStates.map { listState -> remember {
             derivedStateOf { listState.isAtTop }
         } }
 
         val nestedScrollConnection = remember {
-            object : NestedScrollConnection {
-                private fun Float.toYOffset() = Offset(0f, this)
-
-                override fun onPreScroll(
-                    available: Offset,
-                    source: NestedScrollSource,
-                ): Offset {
-                    val delta = available.y
-                    if (delta > 0 && isAtTop[pagerState.currentPage].value) {
-                        anchoredDraggableState.dispatchRawDelta(delta)
-                        return available
-                    }
-                    if (delta < 0 && (isAtTop[pagerState.currentPage].value || anchoredDraggableState.currentValue == AnchorState.End)) {
-                        val consumed = anchoredDraggableState.dispatchRawDelta(delta)
-                        return consumed.toYOffset()
-                    }
-
-                    return super.onPreScroll(available, source)
-                }
-
-                override fun onPostScroll(
-                    consumed: Offset,
-                    available: Offset,
-                    source: NestedScrollSource,
-                ): Offset {
-                    val delta = available.y
-
-                    if (delta > 0 && isAtTop[pagerState.currentPage].value) {
-                        return anchoredDraggableState.dispatchRawDelta(delta).toYOffset()
-                    }
-                    return super.onPostScroll(consumed, available, source)
-                }
-
-                override suspend fun onPostFling(
-                    consumed: Velocity,
-                    available: Velocity,
-                ): Velocity {
-                    anchoredDraggableState.settle(available.y)
-                    return super.onPostFling(consumed, available)
-                }
-            }
+            AnchoredPagerNestedScrollConnection(anchoredDraggableState, isAtTop, pagerState)
         }
 
         Column(
@@ -226,41 +150,41 @@ fun ChatsScreen(
                 // alpha = (0..56) - 36  --->  -36..20  -->  0..20  ->  0..1f  ==>  36..56.dp == 0..1f
                 contentModifier = Modifier.alpha((textFieldHeight.value - 36f).coerceIn(0f, 20f) / 20), // fadein/fadeout effect
                 leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
-                placeholderText = stringResource(R.string.placeholder_search),
+                placeholderText = stringResource(uiR.string.placeholder_search),
                 keyboardActions = KeyboardActions { focusManager.clearFocus() },
             )
 
             ScrollableTabRow(
-                tabItems = TabItem.entries,
+                tabItems = chatsViewModel.chatCategories,
                 pagerState = pagerState,
                 modifier = Modifier
             )
 
             HorizontalPager(
                 state = pagerState,
-                flingBehavior = PagerDefaults.flingBehavior(
-                    state = pagerState,
-                    snapAnimationSpec = tween(250, easing = LinearEasing)
-                ),
+//                flingBehavior = PagerDefaults.flingBehavior(
+//                    state = pagerState,
+//                    snapAnimationSpec = tween(250, easing = FastOutSlowInEasing)
+//                ),
                 snapPosition = SnapPosition.Center,
                 pageNestedScrollConnection = nestedScrollConnection
             ) { index ->
                 // TODO: filter chats corresponding to category from all chats
-                when (TabItem.entries[index]) {
-                    TabItem.All -> {
-                        MockAllChatsColumn(listsStates[0], mockData, onChatClick)
+                when (categories[index]) {
+                    ChatCategory.All -> {
+                        MockAllChatsColumn(listsStates[0], chats, onChatClick)
                     }
 
-                    TabItem.Personal -> {
-                        MockAllChatsColumn(listsStates[1], mockData.slice(0..14), onChatClick)
+                    ChatCategory.Personal -> {
+                        MockAllChatsColumn(listsStates[1], chats.slice(0..14), onChatClick)
                     }
 
-                    TabItem.Channels -> {
-                        MockAllChatsColumn(listsStates[2], mockData.slice(0..4), onChatClick)
+                    ChatCategory.Channels -> {
+                        MockAllChatsColumn(listsStates[2], chats.slice(0..4), onChatClick)
                     }
 
-                    TabItem.Bots -> {
-                        MockAllChatsColumn(listsStates[3], mockData.slice(0..2), onChatClick)
+                    ChatCategory.Bots -> {
+                        MockAllChatsColumn(listsStates[3], chats.slice(0..2), onChatClick)
                     }
                 }
             }
@@ -268,14 +192,11 @@ fun ChatsScreen(
     }
 }
 
-val LazyListState.isAtTop: Boolean
-    get() = firstVisibleItemIndex == 0 && firstVisibleItemScrollOffset == 0
-
 @Composable
 fun MockAllChatsColumn(
     state: LazyListState,
     chats: List<ChatsListItem>,
-    onChatClick: (Int) -> Unit,
+    onChatClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier.fillMaxSize()) {
@@ -286,7 +207,7 @@ fun MockAllChatsColumn(
             itemsIndexed(chats) { index, chat ->
                 ChatsListItemRow(
                     chat = chat,
-                    onClick = { onChatClick(index) })
+                    onClick = { onChatClick(index.toLong()) })
             }
         }
     }
@@ -295,11 +216,6 @@ fun MockAllChatsColumn(
 @Composable
 @ThemePreviews
 fun ChatsScreenPreview() {
-//    val mockData = listOf(
-//        ChatsListItem.mockDataShort, ChatsListItem.mockDataLong, ChatsListItem.mockDataShortMuted, ChatsListItem.mockDataLongMuted,
-//        ChatsListItem.mockDataShort, ChatsListItem.mockDataLong, ChatsListItem.mockDataShortMuted, ChatsListItem.mockDataLongMuted,
-//        ChatsListItem.mockDataShort, ChatsListItem.mockDataLong, ChatsListItem.mockDataShortMuted, ChatsListItem.mockDataLongMuted,
-//    )
     VKMessengerTheme {
         ChatsScreen({})
     }

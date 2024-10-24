@@ -2,4 +2,16 @@
 <resources>
     <string name="feature_friends_title">Friends</string>
 
+    <string name="online">online</string>
+
+    <string name="days_left">%d days until birthday</string>
+    <string name="no_results">No Friends found by that prompt</string>
+
+    <string name="sort">Sort</string>
+    <string name="sort_importance">Importance</string>
+    <string name="sort_online">Online</string>
+    <string name="sort_name">Name</string>
+    <string name="sort_surname">Surname</string>
+    <string name="sort_last_seen">Last Seen</string>
+    <string name="sort_birthday">Birthday</string>
 </resources>

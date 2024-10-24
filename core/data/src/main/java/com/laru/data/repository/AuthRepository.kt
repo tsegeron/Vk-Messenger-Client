@@ -6,5 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface AuthRepository {
     val authState: StateFlow<AuthState>
 
-     suspend fun proceedAuthorization()
+    suspend fun loginSucceeded()
+    suspend fun loginFailed()
+    suspend fun logout()
 }

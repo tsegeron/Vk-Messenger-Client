@@ -10,13 +10,13 @@ import com.laru.chat.ChatViewModel
 import kotlinx.serialization.Serializable
 
 
-@Serializable data class ChatRoute(val chatId: Int)
+@Serializable data class ChatRoute(val chatId: Long)
 
-fun NavController.navigateToChat(chatId: Int) = navigate(ChatRoute(chatId))
+fun NavController.navigateToChat(chatId: Long) = navigate(ChatRoute(chatId))
 
 fun NavGraphBuilder.chatScreen(
     onBackClick: () -> Unit,
-     onChatInfoClick: () -> Unit,
+    onChatInfoClick: () -> Unit,
 ) {
     composable<ChatRoute> {
         val arguments = it.toRoute<ChatRoute>()

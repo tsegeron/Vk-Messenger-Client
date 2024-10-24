@@ -20,7 +20,7 @@ fun NavController.navigateToChats() = navigate(ChatsNavigation) {
     restoreState = true
 }
 
-fun NavGraphBuilder.chatsScreenNavigation(onChatClick: (Int) -> Unit, routes: NavGraphBuilder.() -> Unit) =
+fun NavGraphBuilder.chatsScreenNavigation(onChatClick: (Long) -> Unit, routes: NavGraphBuilder.() -> Unit) =
     navigation<ChatsNavigation>(startDestination = ChatsRoute) {
 
         chatsScreen(onChatClick = onChatClick)
@@ -28,7 +28,7 @@ fun NavGraphBuilder.chatsScreenNavigation(onChatClick: (Int) -> Unit, routes: Na
         routes()
     }
 
-private fun NavGraphBuilder.chatsScreen(onChatClick: (Int) -> Unit) =
+private fun NavGraphBuilder.chatsScreen(onChatClick: (Long) -> Unit) =
     composable<ChatsRoute> {
         ChatsScreen(onChatClick = onChatClick)
     }

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -14,6 +16,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+
     }
 
     buildTypes {
@@ -35,6 +39,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:common"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.appcompat)
@@ -44,6 +49,7 @@ dependencies {
     implementation(libs.hilt.android)
 
     implementation(libs.kotlinxCoroutines)
+
     implementation(libs.bundles.vk.sdk)
 
     testImplementation(libs.junit)

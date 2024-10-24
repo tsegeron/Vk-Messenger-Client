@@ -25,12 +25,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.laru.ui.model.Paddings
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
     Scaffold(
         modifier = Modifier.consumeWindowInsets(WindowInsets.navigationBars),
         topBar = {
@@ -60,7 +63,7 @@ fun SettingsScreen() {
             contentAlignment = Alignment.Center
         ) {
             TextButton(
-                onClick = {}, // onBackClick, // finish
+                onClick = viewModel::logout, // onBackClick, // finish
                 modifier = Modifier
                     .padding(horizontal = Paddings.large)
                     .fillMaxWidth()
@@ -70,7 +73,7 @@ fun SettingsScreen() {
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
-                Text(text = "Settings Screen")
+                Text(text = "Log Out")
             }
         }
     }

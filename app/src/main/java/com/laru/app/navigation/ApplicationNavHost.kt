@@ -81,7 +81,7 @@ fun ApplicationNavHost(
                 chatInfoScreen(onBackClick = navHostController::popBackStack)
             }
 
-            friendsScreen()
+            friendsScreen(onFriendClick = navHostController::navigateToChat)
 
             settingsScreen()
         }
@@ -89,7 +89,6 @@ fun ApplicationNavHost(
         if (isBottomBarShown) {
             NavigationBar(
                 modifier = Modifier.consumeWindowInsets(WindowInsets.navigationBars), // remove??
-//                windowInsets = WindowInsets.navigationBars
             ) {
                 TopLevelDestination.entries.forEach { destination ->
                     val isSelected = currentDestination.isRouteInHierarchy(destination.route)

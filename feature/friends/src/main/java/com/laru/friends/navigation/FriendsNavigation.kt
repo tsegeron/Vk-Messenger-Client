@@ -20,6 +20,6 @@ fun NavController.navigateToFriends() = navigate(FriendsRoute) {
     restoreState = true
 }
 
-fun NavGraphBuilder.friendsScreen() = composable<FriendsRoute> {
-    FriendsScreen()
+fun NavGraphBuilder.friendsScreen(onFriendClick: (Long) -> Unit) = composable<FriendsRoute> {
+    FriendsScreen(onFriendClick = onFriendClick)
 }
