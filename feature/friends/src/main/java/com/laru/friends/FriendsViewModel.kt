@@ -49,9 +49,6 @@ class FriendsViewModel @Inject constructor(
                 _friendsUiState.update { currentState ->
                     currentState.copy(
                         friendsList = friendsList,
-//                        closestBirthdays = friendsList.filter {
-//                            it.birthday != null && it.birthday!!.daysTillBirthday < 2
-//                        },
                         friendsListSorted = getSortedFriendsList(friendsList, currentState.sortType)
                     )
                 }

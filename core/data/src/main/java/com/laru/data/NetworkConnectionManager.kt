@@ -35,7 +35,7 @@ class NetworkConnectionManagerImpl @Inject constructor(
 
     private val connectivityManager: ConnectivityManager = appContext.getSystemService()!!
     private val networkCallback = NetworkCallback()
-    private val _currentNetwork = MutableStateFlow(provideDefaultCurrentNetwork())
+    private val _currentNetwork = MutableStateFlow(CurrentNetwork())
 
     override val isNetworkConnectedFlow: StateFlow<Boolean> =
         _currentNetwork
@@ -55,7 +55,7 @@ class NetworkConnectionManagerImpl @Inject constructor(
             return
 
         _currentNetwork.update {
-            provideDefaultCurrentNetwork().copy(isListening = true)
+            CurrentNetwork().copy(isListening = true)
         }
 
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
@@ -116,17 +116,10 @@ class NetworkConnectionManagerImpl @Inject constructor(
 
 
     private data class CurrentNetwork(
-        val isListening: Boolean,
-        val isAvailable: Boolean,
-        val isBlocked: Boolean,
-        val networkCapabilities: NetworkCapabilities?
-    )
-
-    private fun provideDefaultCurrentNetwork(): CurrentNetwork = CurrentNetwork(
-        isListening = false,
-        isAvailable = false,
-        isBlocked = false,
-        networkCapabilities = null
+        val isListening: Boolean = false,
+        val isAvailable: Boolean = false,
+        val isBlocked: Boolean = false,
+        val networkCapabilities: NetworkCapabilities? = null
     )
 
     private fun CurrentNetwork.isConnected(): Boolean =

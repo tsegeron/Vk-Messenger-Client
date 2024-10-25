@@ -1,10 +1,8 @@
 package com.laru.friends
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -172,7 +170,6 @@ fun FriendsScreen(
                     uiState.searchPrompt.text.isEmpty() -> uiState.friendsListSorted
                     else -> uiState.friendsListOnSearch
                 },
-//                birthdaysList = uiState.closestBirthdays,
                 showBirthdate = uiState.sortType == FriendsUiState.SortType.Birthday,
                 onFriendClick = onFriendClick,
                 nestedScrollConnection = nestedScrollConnection,
@@ -188,7 +185,6 @@ fun FriendsScreen(
 @Composable
 private fun FriendsScreenContent(
     friendsList: List<Friend>?,
-//    birthdaysList: List<Friend>,
     showBirthdate: Boolean,
     onFriendClick: (Long) -> Unit,
     nestedScrollConnection: NestedScrollConnection,
@@ -206,22 +202,12 @@ private fun FriendsScreenContent(
             Text(stringResource(R.string.no_results))
         }
     } else {
-        // TODO ModalDrawerSheet to profile and chat!!
-        // TODO add a row with a birthday if its today/tomorrow!!
-//        val tomorrowBirthdayNames = birthdaysList
-//            .filter { it.birthday!!.daysTillBirthday == 1 }
-//            .map(Friend::firstName)
-//            .joinToString(", ")
-
+        // TODO ModalDrawerSheet to profile and chat
         LazyColumn(
             modifier = modifier.nestedScroll(nestedScrollConnection),
             state = listState
         ) {
-//            item() {
-//                Text
-//            }
-
-            items(friendsList, key = Friend::id) { friend ->
+            items(friendsList) { friend ->
                 FriendsListItemRow(
                     friend = friend,
                     showBirthdate = showBirthdate,

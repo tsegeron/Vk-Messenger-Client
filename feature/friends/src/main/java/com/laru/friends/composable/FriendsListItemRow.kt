@@ -71,9 +71,14 @@ fun FriendsListItemRow(
 
             if (showBirthdate && friend.birthday != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = friend.birthday!!.date) // TODO change date format to D.MMM
-                    Spacer(Modifier.width(Spacers.small))
-                    Text(text = stringResource(R.string.days_left, friend.birthday!!.daysTillBirthday))
+                    Text(text = friend.birthday!!.date)
+                    Spacer(Modifier.width(Spacers.extraSmall))
+                    val text = when (friend.birthday!!.daysTillBirthday) {
+                        0 -> stringResource(R.string.today)
+                        1 -> stringResource(R.string.tomorrow)
+                        else -> stringResource(R.string.days_left, friend.birthday!!.daysTillBirthday)
+                    }
+                    Text(text = text)
                 }
             } else {
                 if (friend.isOnline) {

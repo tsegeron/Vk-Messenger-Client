@@ -33,19 +33,11 @@ class FriendsRepositoryImpl @Inject constructor(
     override val friends: StateFlow<List<Friend>> = _friends
 
     override fun getFriends() {
-        val fields = listOf(
-            UsersFieldsDto.PHOTO_200,   // https://dev.vk.com/ru/reference/objects/user#photo_200
-            UsersFieldsDto.ONLINE,      // https://dev.vk.com/ru/reference/objects/user#online
-            UsersFieldsDto.LAST_SEEN,   // https://dev.vk.com/ru/reference/objects/user#last_seen
-            UsersFieldsDto.VERIFIED,    // https://dev.vk.com/ru/reference/objects/user#verified
-            UsersFieldsDto.BIRTHDATE,   // https://dev.vk.com/ru/reference/objects/user#bdate
-        )
-
 //        FriendsService().friendsGetOnline()
 
         coroutineScope.launch(SupervisorJob() + Dispatchers.IO) {
             // order = FriendsGetOrderDto.HINTS to get friends sorted by importance
-            VK.execute(FriendsService().friendsGet(fields = fields, order = FriendsGetOrderDto.HINTS), object :
+            VK.execute(FriendsService().friendsGet(fields = FIELDS, order = FriendsGetOrderDto.HINTS), object :
                 VKApiCallback<FriendsGetFieldsResponseDto> {
                 override fun success(result: FriendsGetFieldsResponseDto) {
                     val friendsList = result.items
@@ -117,5 +109,12 @@ class FriendsRepositoryImpl @Inject constructor(
 
     companion object {
         const val TAG = "FriendsRepositoryImpl"
+        val FIELDS = listOf(
+            UsersFieldsDto.PHOTO_200,   // https://dev.vk.com/ru/reference/objects/user#photo_200
+            UsersFieldsDto.ONLINE,      // https://dev.vk.com/ru/reference/objects/user#online
+            UsersFieldsDto.LAST_SEEN,   // https://dev.vk.com/ru/reference/objects/user#last_seen
+            UsersFieldsDto.VERIFIED,    // https://dev.vk.com/ru/reference/objects/user#verified
+            UsersFieldsDto.BIRTHDATE,   // https://dev.vk.com/ru/reference/objects/user#bdate
+        )
     }
 }

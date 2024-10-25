@@ -1,11 +1,13 @@
 package com.laru.common.extensions
 
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 
 /*
@@ -61,6 +63,15 @@ fun Int.toTimeElapsed(): TimeElapsed {
         durationMinutes > 14 -> TimeElapsed.MinutesAgo(durationMinutes.toString())
         else -> TimeElapsed.Recently
     }
+}
+
+fun String.formatAsDMMMM(): String {
+    val birthday = if (this.length < 6) this else this.substringBeforeLast('.')
+    val inputFormat = SimpleDateFormat("d.M", Locale.getDefault())
+    val outputFormat = SimpleDateFormat("d MMMM", Locale.getDefault())
+
+    val date = inputFormat.parse(birthday)!!
+    return outputFormat.format(date)
 }
 
 fun String.getDaysUntilBirthday(): Int {

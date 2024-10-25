@@ -4,6 +4,8 @@
 
     <string name="online">online</string>
 
+    <string name="today">today</string>
+    <string name="tomorrow">tomorrow</string>
     <string name="days_left">%d days until birthday</string>
     <string name="no_results">No Friends found by that prompt</string>
 

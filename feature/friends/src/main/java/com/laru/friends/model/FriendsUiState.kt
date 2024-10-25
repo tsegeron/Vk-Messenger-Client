@@ -17,7 +17,6 @@ import com.laru.friends.R
  */
 data class FriendsUiState(
     val friendsList: List<Friend> = emptyList(),
-//    val closestBirthdays: List<Friend> = emptyList(),
 
     val searchPrompt: TextFieldValue = TextFieldValue(),
     val friendsListOnSearch: List<Friend> = emptyList(),
@@ -38,11 +37,11 @@ data class FriendsUiState(
      * @property Birthday sorted by birthday; can be reversed
      */
     enum class SortType(@StringRes val sortTypeResId: Int) {
-        Default(R.string.sort_importance),     // 1. online; 2. lastSeen, no reverse
-        Online(R.string.sort_online),       // only online, no reverse
-        LastSeen(R.string.sort_last_seen),  // , no reverse
+        Default(R.string.sort_importance),
+        Online(R.string.sort_online),
+        LastSeen(R.string.sort_last_seen),
         Name(R.string.sort_name),
         Surname(R.string.sort_surname),
-        Birthday(R.string.sort_birthday),   // closest birthday first
+        Birthday(R.string.sort_birthday),
     }
 }

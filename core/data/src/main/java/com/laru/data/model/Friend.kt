@@ -1,6 +1,7 @@
 package com.laru.data.model
 
 import com.laru.common.extensions.TimeElapsed
+import com.laru.common.extensions.formatAsDMMMM
 import com.laru.common.extensions.getDaysUntilBirthday
 import com.laru.common.extensions.toTimeElapsed
 import com.vk.sdk.api.users.dto.UsersLastSeenDto
@@ -33,6 +34,11 @@ data class Friend(
     }
 }
 
+fun String.toBirthday() = Friend.Birthday(
+    date = this.formatAsDMMMM(),
+    daysTillBirthday = this.getDaysUntilBirthday()
+)
+
 /**
  * Narrows a variety of devices down to 2 options
  *
@@ -47,11 +53,6 @@ data class Friend(
  *      6. Windows
  *      7. Webpage version
  */
-fun String.toBirthday() = Friend.Birthday(
-    date = this,
-    daysTillBirthday = this.getDaysUntilBirthday()
-)
-
 fun UsersLastSeenDto.toLastSeen() = Friend.LastSeenInfo(
     time = time!!,
     timeElapsed = time!!.toTimeElapsed(),

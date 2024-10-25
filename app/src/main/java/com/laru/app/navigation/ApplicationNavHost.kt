@@ -95,11 +95,11 @@ fun ApplicationNavHost(
 
                     NavigationBarItem(
                         selected = isSelected,
-                        onClick = { when(destination) {
-                            TopLevelDestination.Friends -> navHostController.navigateToFriends()
-                            TopLevelDestination.Chats -> navHostController.navigateToChats()
-                            TopLevelDestination.Settings -> navHostController.navigateToSettings()
-                        } },
+                        onClick = when (destination) {
+                            TopLevelDestination.Friends -> navHostController::navigateToFriends
+                            TopLevelDestination.Chats -> navHostController::navigateToChats
+                            TopLevelDestination.Settings -> navHostController::navigateToSettings
+                        },
                         icon = { Icon(
                             imageVector = if (isSelected) destination.selectedIcon else destination.unselectedIcon,
                             contentDescription = stringResource(destination.iconTextId)
