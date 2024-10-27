@@ -1,10 +1,12 @@
 package com.laru.ui.composable
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -13,7 +15,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,12 +35,12 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,9 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
@@ -61,6 +60,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.laru.app.ui.theme.VKMessengerTheme
 import com.laru.common.preview.ThemePreviews
 import com.laru.ui.R
@@ -75,15 +75,14 @@ fun BasicInputTextField(
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
     contentModifier: Modifier = Modifier, // for the row with leading/trailing icon, placeholder, value
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     onCancel: () -> Unit = { onValueChange(TextFieldValue()) },
     enabled: Boolean = true,
     isError: Boolean = false,
-    focused: MutableState<Boolean> = remember { mutableStateOf(false) },
     leadingIcon: @Composable (() -> Unit)? = null,
     placeholderText: String? = null, // so its width could be measured
-//    placeholderText: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = defaultTrailingIcon(
-        value.text, onCancel, enabled, isError, focused.value
+        value.text, onCancel, enabled, isError, interactionSource.collectIsFocusedAsState().value
     ),
     keyboardOptions: KeyboardOptions = KeyboardOptions(
         autoCorrectEnabled = false,
@@ -92,30 +91,27 @@ fun BasicInputTextField(
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     textStyle: TextStyle = LocalTextStyle.current,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = MaterialTheme.shapes.large, // medium
     colors: TextFieldColors = TextFieldDefaults.basicInputTextFieldColors(),
 ) {
-    val focusRequester = remember { FocusRequester() }
+    val isFocused = interactionSource.collectIsFocusedAsState().value
 
     CompositionLocalProvider(LocalTextSelectionColors provides colors.textSelectionColors) {
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = modifier
-                .focusRequester(focusRequester)
-                .onFocusChanged { focused.value = it.isFocused },
+            modifier = modifier,
             singleLine = true,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             textStyle = textStyle,
             interactionSource = interactionSource,
             decorationBox = decorationBox(
-                pickedColors = colorPicker(enabled, isError, focused.value, colors),
+                pickedColors = colorPicker(enabled, isError, isFocused, colors),
                 placeholderText = placeholderText,
                 textStyle = textStyle,
                 shape = shape,
-                focused = focused.value,
+                focused = isFocused,
                 isValueEmpty = value.text.isEmpty(),
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -140,25 +136,24 @@ private fun decorationBox(
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
 
-    placeholderText?.let {
+    if (placeholderText != null) {
         LaunchedEffect(placeholderText) {
             val textLayoutResult = textMeasurer.measure(placeholderText, style = textStyle, maxLines = 1)
             measuredTextWidth = with(density) { textLayoutResult.size.width.toDp() }
         }
     }
 
-    Box(
-        Modifier
-            .fillMaxSize()
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxHeight()
             .background(pickedColors.containerColor, shape)
             .then(
                 if (focused) { // TODO: provide proper color
                     Modifier.border(1.dp, shape = shape, color = pickedColors.trailingIconColor)
                 } else Modifier
-            )
-    )
-
-    BoxWithConstraints(contentAlignment = Alignment.CenterStart) {
+            ),
+        contentAlignment = Alignment.CenterStart
+    ) {
         val startPadding by animateDpAsState(
             targetValue = if (focused || !isValueEmpty) {
                 PaddingValues(Paddings.small).calculateStartPadding(LayoutDirection.Ltr)
@@ -169,8 +164,8 @@ private fun decorationBox(
         Row(
             modifier = Modifier
                 .padding(start = startPadding, end = Paddings.small)
-                .fillMaxWidth()
                 .then(rowModifier),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             CompositionLocalProvider(LocalContentColor provides pickedColors.leadingIconColor) {
@@ -188,7 +183,9 @@ private fun decorationBox(
                     }
                 }
                 CompositionLocalProvider(LocalContentColor provides pickedColors.trailingIconColor) {
-                    trailingIcon?.invoke()
+                    Box(Modifier.size(Sizes.iconDefault)) {
+                        trailingIcon?.invoke()
+                    }
                 }
             }
         }
@@ -343,9 +340,6 @@ private data class ColorPicker(
 private fun BasicInputTextFieldPreview() {
     VKMessengerTheme {
         Surface {
-            val isFocused = remember {
-                mutableStateOf(true)
-            }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -354,16 +348,43 @@ private fun BasicInputTextFieldPreview() {
             ) {
                 val modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
                     .height(40.dp)
 
-                BasicInputTextField(
-                    modifier = modifier,
-                    value = TextFieldValue("Enabled"),
-                    focused = isFocused,
-                    onValueChange = {},
-                    leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
-                )
+                Row(modifier) {
+                    TextButton(
+                        onClick = {},
+                        border = BorderStroke(2.dp, Color.White),
+                        modifier = Modifier.height(40.dp).width(80.dp)
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontSize = 16.sp,
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    BasicInputTextField(
+                        modifier = Modifier.weight(1f),
+                        value = TextFieldValue("Enabled"),
+//                        focused = false,
+                        onValueChange = {},
+                        leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
+                    )
+
+                    Spacer(Modifier.width(12.dp))
+
+                    TextButton(
+                        onClick = {},
+                        border = BorderStroke(2.dp, Color.White),
+                        modifier = Modifier.height(40.dp)
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontSize = 16.sp,
+                        )
+                    }
+                }
                 BasicInputTextField(
                     modifier = modifier,
                     value = TextFieldValue(),

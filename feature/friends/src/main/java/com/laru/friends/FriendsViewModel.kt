@@ -56,6 +56,7 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
+    // TODO add auto data refreshing
 //    fun onRefresh() {
 //        friendsRepository.getFriends()
 //    }
